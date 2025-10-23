@@ -1,0 +1,96 @@
+/* small reset so body margin doesn't shift layout */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* page wrapper */
+.page {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background: #f9f9f9;
+  box-sizing: border-box;
+}
+
+/* navbar */
+.navbar {
+  width: 100%;
+  height: 64px;
+  background: #222; /* keep black, can change to blue if needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* CENTERING CONTAINER - spans full width to center children */
+.center-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 64px);  /* viewport minus navbar */
+  margin-top: 64px;            /* push content below fixed navbar */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* card */
+.form-box {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  margin: auto; /* fallback */
+}
+
+.form-box h2 {
+  margin-bottom: 1.5rem;
+  color: #222;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+/* form controls */
+.form-box input[type="file"] {
+  margin-bottom: 1.5rem;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* blue button */
+.form-box button {
+  padding: 0.7rem 1.5rem;
+  background-color: #007bff; /* blue */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+.form-box button:hover {
+  background-color: #0056b3; /* darker blue on hover */
+}
