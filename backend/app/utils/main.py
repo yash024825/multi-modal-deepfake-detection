@@ -7,31 +7,26 @@ from torchvision import models, transforms
 from PIL import Image
 from collections import Counter
 
-# ============================================================
-# 🔧 Path Setup
-# ============================================================
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-MODEL_DIR = os.path.join(BASE_DIR, "models")  # backend/models
+MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ============================================================
-# 🧩 Function: Load Model
-# ============================================================
-
+# =========================
+# LOAD MODEL (SAFE)
+# =========================
 def load_model(model_path, model_type="resnet"):
     if not os.path.exists(model_path):
-        print(f"error: Model file not found: {model_path}")
+        print("error: model file not found")
         return None
 
-    if model_type == "resnet":  # image/video
+    if model_type == "resnet":
         model = models.resnet18(weights=None)
         model.fc = nn.Linear(model.fc.in_features, 2)
-    elif model_type == "audio":  # audio
+    else:
         class AudioClassifier(nn.Module):
             def __init__(self):
-                super(AudioClassifier, self).__init__()
+                super().__init__()
                 self.fc = nn.Sequential(
                     nn.Linear(40, 64),
                     nn.ReLU(),
@@ -41,143 +36,146 @@ def load_model(model_path, model_type="resnet"):
 
             def forward(self, x):
                 return self.fc(x)
+
         model = AudioClassifier()
-    else:
-        print("error: unknown model type")
-        return None
 
     try:
         model.load_state_dict(torch.load(model_path, map_location=device))
     except Exception as e:
-        print(f"error: failed to load model: {e}")
+        print(f"error: model load failed {e}")
         return None
 
-    model = model.to(device)
+    model.to(device)
     model.eval()
     return model
 
-# ============================================================
-# 🧠 Function: Predict on Image
-# ============================================================
 
-def predict_image(model, img_path):
+# =========================
+# IMAGE
+# =========================
+def predict_image(model, path):
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406],
-                             [0.229, 0.224, 0.225])
     ])
+
     try:
-        img = Image.open(img_path).convert("RGB")
-    except Exception:
+        img = Image.open(path).convert("RGB")
+    except:
         return "error: cannot open image"
 
-    tensor = transform(img).unsqueeze(0).to(device)
+    x = transform(img).unsqueeze(0).to(device)
+
     with torch.no_grad():
-        outputs = model(tensor)
-        _, pred = torch.max(outputs, 1)
+        out = model(x)
+        _, pred = torch.max(out, 1)
 
-    classes = ["real", "fake"]
-    return classes[pred.item()]
+    return ["real", "fake"][pred.item()]
 
-# ============================================================
-# 🎥 Function: Predict on Video
-# ============================================================
 
-def predict_video(model, video_path, every_n_frames=30, max_frames=20):
-    cap = cv2.VideoCapture(video_path)
+# =========================
+# VIDEO
+# =========================
+def predict_video(model, path):
+    cap = cv2.VideoCapture(path)
     if not cap.isOpened():
         return "error: cannot open video"
 
-    frame_count, saved_preds = 0, []
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406],
-                             [0.229, 0.224, 0.225])
-    ])
-    classes = ["real", "fake"]
+    preds = []
+    count = 0
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        if frame_count % every_n_frames == 0:
+
+        if count % 30 == 0:
             img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            tensor = transform(img).unsqueeze(0).to(device)
+            tensor = transforms.ToTensor()(img).unsqueeze(0).to(device)
+
             with torch.no_grad():
-                outputs = model(tensor)
-                _, pred = torch.max(outputs, 1)
-            saved_preds.append(classes[pred.item()])
-            if len(saved_preds) >= max_frames:
-                break
-        frame_count += 1
+                out = model(tensor)
+                _, pred = torch.max(out, 1)
+
+            preds.append(["real", "fake"][pred.item()])
+
+        count += 1
 
     cap.release()
-    if not saved_preds:
-        return "error: no frames processed"
-    return Counter(saved_preds).most_common(1)[0][0]
 
-# ============================================================
-# 🔈 Function: Predict on Audio
-# ============================================================
+    if not preds:
+        return "error: no frames"
 
-def predict_audio(model, audio_path):
-    if not os.path.exists(audio_path):
-        return "error: file not found"
-    
+    return Counter(preds).most_common(1)[0][0]
+
+
+# =========================
+# AUDIO
+# =========================
+def predict_audio(model, path):
     import librosa
-    y, sr = librosa.load(audio_path, sr=16000)
+
+    try:
+        y, sr = librosa.load(path, sr=16000)
+    except:
+        return "error: cannot load audio"
+
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
-    mfcc = torch.tensor(mfcc.mean(axis=1), dtype=torch.float32).unsqueeze(0).to(device)
+    x = torch.tensor(mfcc.mean(axis=1)).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        outputs = model(mfcc)
-        _, pred = torch.max(outputs, 1)
-    classes = ["real", "fake"]
-    return classes[pred.item()]
+        out = model(x)
+        _, pred = torch.max(out, 1)
 
-# ============================================================
-# 🚀 Main Execution
-# ============================================================
+    return ["real", "fake"][pred.item()]
 
+
+# =========================
+# MAIN
+# =========================
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("error: no input file provided")
+        print("error: no input file")
         sys.exit(1)
 
     file_path = sys.argv[1]
+
     if not os.path.exists(file_path):
-        print(f"error: input file not found: {file_path}")
+        print("error: file not found")
         sys.exit(1)
 
     ext = os.path.splitext(file_path)[1].lower()
 
-    # Select model type & path
     if ext in [".jpg", ".jpeg", ".png"]:
         model_path = os.path.join(MODEL_DIR, "saved_model.pth")
-        model_type = "resnet"
-    elif ext in [".mp4", ".avi", ".mov", ".mkv"]:
+        model = load_model(model_path)
+
+        if model is None:
+            print("error: model load failed")
+            sys.exit(1)
+
+        print(predict_image(model, file_path))
+
+    elif ext in [".mp4", ".avi", ".mov"]:
         model_path = os.path.join(MODEL_DIR, "video_model.pth")
-        model_type = "resnet"
+        model = load_model(model_path)
+
+        if model is None:
+            print("error: model load failed")
+            sys.exit(1)
+
+        print(predict_video(model, file_path))
+
     elif ext in [".wav", ".mp3"]:
         model_path = os.path.join(MODEL_DIR, "audio_model.pth")
-        model_type = "audio"
+        model = load_model(model_path, model_type="audio")
+
+        if model is None:
+            print("error: model load failed")
+            sys.exit(1)
+
+        print(predict_audio(model, file_path))
+
     else:
-        print("unsupported file format")
-        sys.exit(0)
-
-    # Load model
-    model = load_model(model_path, model_type=model_type)
-
-    # Predict
-    if ext in [".jpg", ".jpeg", ".png"]:
-        result = predict_image(model, file_path) if model else "error: model not loaded"
-    elif ext in [".mp4", ".avi", ".mov", ".mkv"]:
-        result = predict_video(model, file_path) if model else "error: model not loaded"
-    elif ext in [".wav", ".mp3"]:
-        result = predict_audio(model, file_path) if model else "error: model not loaded"
-    else:
-        result = "unsupported"
-
-    print(result)
+        print("error: unsupported format")
+        sys.exit(1)

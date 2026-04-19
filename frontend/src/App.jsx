@@ -1,60 +1,71 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import Home from "./Pages/Home.jsx";
-import UploadForm from "./Pages/UploadForm.jsx";
-import DiagnosisResult from "./Pages/DiagnosisResult.jsx";
+import UploadForm from "./Pages/UploadMediaPage.jsx";
+import DiagnosisResult from "./Pages/Result.jsx";
 import Login from "./Pages/Login.jsx";
 import Signup from "./Pages/Signup.jsx";
+import Profile from "./Pages/Profile.jsx";
 
-const Navbar = () => {
-  const location = useLocation();
+/* ---------------- Protected Route ---------------- */
+const ProtectedRoute = ({ children }) => {
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
-  // Hide Navbar on login, signup, and result pages
-  if (location.pathname === "/" || location.pathname === "/signup" || location.pathname === "/result") {
-    return null;
-  }
-
-  return (
-    <nav style={{ background: "#222", padding: "1rem" }}>
-      <ul
-        style={{
-          listStyle: "none",
-          display: "flex",
-          gap: "2rem",
-          margin: 0,
-          padding: 0,
-          justifyContent: "center",
-        }}
-      >
-        <li>
-          <Link to="/home" style={{ color: "white", textDecoration: "none" }}>
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="/upload" style={{ color: "white", textDecoration: "none" }}>
-            Upload
-          </Link>
-        </li>
-      </ul>
-    </nav>
-  );
+  return isLoggedIn ? children : <Navigate to="/login" replace />;
 };
 
+/* ---------------- App ---------------- */
 const App = () => {
   return (
     <Router>
-      <div>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/upload" element={<UploadForm />} />
-          <Route path="/result" element={<DiagnosisResult />} />
-        </Routes>
-      </div>
+      <Routes>
+
+        {/* 🔵 Default route redirect */}
+        <Route path="/" element={<Home />} />
+
+        {/* 🔵 Auth routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* 🔒 Protected routes */}
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute>
+              <UploadForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/result"
+          element={
+            <ProtectedRoute>
+              <DiagnosisResult />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🔴 Catch unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+      </Routes>
     </Router>
   );
 };
