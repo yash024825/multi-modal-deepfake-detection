@@ -1,0 +1,15 @@
+{
+  "providers": ["node", "python"],
+  "install": {
+    "cmds": [
+      "pip install -r requirements.txt",
+      "npm install"
+    ]
+  },
+  "build": {
+    "cmds": []
+  },
+  "start": {
+    "cmd": "node server.js"
+  }
+}
