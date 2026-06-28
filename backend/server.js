@@ -104,7 +104,7 @@ app.post("/api/detect", upload.single("file"), (req, res) => {
     console.log("📤 Output:", result);
 
     // 🔴 SAFE ERROR HANDLING
-    if (code !== 0 || errorOutput) {
+    if (code !== 0) {
       return res.status(500).json({
         error: "Detection failed",
         details: errorOutput || result || "Unknown error",
