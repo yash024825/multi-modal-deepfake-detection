@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { signOutUser } from "../firebase";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -31,7 +32,7 @@ const UploadMediaPage = () => {
   const profileLetter =
     localStorage.getItem("currentUser")?.charAt(0).toUpperCase() || "T";
 
-  const handleLogout = () => { localStorage.clear(); navigate("/login"); };
+  const handleLogout = async () => { await signOutUser(); navigate("/login"); };
 
   const validateFile = (f) => {
     if (!f) return null;

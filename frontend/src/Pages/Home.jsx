@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signOutUser } from "../firebase";
 import projectImage from "../assets/project-image.jpg";
 
 const Home = () => {
@@ -18,10 +19,9 @@ const Home = () => {
   }, []);
 
   const handleStart = () => navigate(isLoggedIn ? "/upload" : "/login");
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (isLoggedIn) {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("currentUser");
+      await signOutUser();
     }
     navigate("/login");
   };

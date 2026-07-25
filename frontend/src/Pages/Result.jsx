@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { signOutUser } from "../firebase";
 
 const CYAN   = "#00D4FF";
 const BLUE   = "#1565C0";
@@ -21,9 +22,8 @@ const Result = () => {
   const currentUser   = localStorage.getItem("currentUser");
   const profileLetter = currentUser ? currentUser.charAt(0).toUpperCase() : "T";
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("currentUser");
+   const handleLogout = async () => {
+    await signOutUser();
     navigate("/login");
   };
 

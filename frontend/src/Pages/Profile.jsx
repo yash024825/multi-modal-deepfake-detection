@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { signOutUser } from "../firebase";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -12,10 +13,8 @@ const Profile = () => {
   // First letter for profile icon
   const firstLetter = currentUser.charAt(0).toUpperCase();
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("currentUser");
-
+  const handleLogout = async () => {
+    await signOutUser();
     alert("Logged out successfully!");
     navigate("/login");
   };

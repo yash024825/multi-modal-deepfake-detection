@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider, getAuthErrorMessage } from "../firebase";
 import aiImage from "../assets/deepfake-ai-image.jpg"; 
 // Replace with your downloaded AI deepfake image inside src/assets/
 
@@ -9,20 +11,26 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Google Sign Up Demo
-  const handleGoogleSignup = () => {
-    alert("Google Sign-Up can be connected using Firebase later.");
-
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", "googleuser@gmail.com");
-
-    navigate("/");
+  // Google Sign Up
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", result.user.email || "Google User");
+      navigate("/");
+    } catch (err) {
+      alert(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Email Signup
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     if (password !== confirm) {
@@ -35,26 +43,16 @@ const Signup = () => {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const userExists = users.find((user) => user.email === email);
-
-    if (userExists) {
-      alert("Account already exists! Please login.");
+    setLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Account created successfully! Please login.");
       navigate("/login");
-      return;
+    } catch (err) {
+      alert(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    const newUser = {
-      email,
-      password,
-    };
-
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-
-    alert("Account created successfully!");
-    navigate("/login");
   };
 
   return (
@@ -69,15 +67,9 @@ const Signup = () => {
           </p>
 
           {/* Google Sign Up */}
-          <button style={googleButton} onClick={handleGoogleSignup}>
+          <button style={googleButton} onClick={handleGoogleSignup} disabled={loading}>
             <span style={googleIcon}>G</span>
-            Sign up with Google
-          </button>
-
-          {/* Email Button */}
-          <button style={emailButton}>
-            <span style={emailIcon}>✉</span>
-            Sign up with Email
+            {loading ? "Please wait…" : "Sign up with Google"}
           </button>
 
           {/* Divider */}
@@ -116,8 +108,8 @@ const Signup = () => {
               style={inputStyle}
             />
 
-            <button type="submit" style={buttonStyle}>
-              Create Account
+            <button type="submit" style={buttonStyle} disabled={loading}>
+              {loading ? "Creating account…" : "Create Account"}
             </button>
           </form>
 
@@ -211,36 +203,6 @@ const googleIcon = {
   height: "32px",
   borderRadius: "50%",
   background: "#ea4335",
-  color: "#ffffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: "700",
-};
-
-const emailButton = {
-  width: "100%",
-  padding: "14px",
-  background: "#ffffff",
-  border: "1px solid #dbeafe",
-  borderRadius: "12px",
-  cursor: "pointer",
-  fontSize: "15px",
-  fontWeight: "600",
-  color: "#0f172a",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "10px",
-  marginBottom: "20px",
-  boxSizing: "border-box",
-};
-
-const emailIcon = {
-  width: "32px",
-  height: "32px",
-  borderRadius: "50%",
-  background: "#1565c0",
   color: "#ffffff",
   display: "flex",
   alignItems: "center",

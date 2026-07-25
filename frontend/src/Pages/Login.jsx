@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider, getAuthErrorMessage } from "../firebase";
 import aiImage from "../assets/deepfake-ai-image.jpg"; 
 // Replace this image with the deepfake-related AI image downloaded from:
 // https://cyberdeepakyadav.com/deepfake-detection-and-multimedia-forensics
@@ -9,41 +11,38 @@ import aiImage from "../assets/deepfake-ai-image.jpg";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Google Sign In Demo
-  const handleGoogleLogin = () => {
-    alert("Google Sign-In can be connected using Firebase later.");
-
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", "googleuser@gmail.com");
-
-    navigate("/");
+  // Google Sign In
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", result.user.email || "Google User");
+      navigate("/");
+    } catch (err) {
+      alert(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Email Sign In
-  const handleEmailLogin = (e) => {
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
-
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const user = users.find((u) => u.email === email);
-
-    if (!user) {
-      alert("Account not found! Please create an account.");
-      return;
+    setLoading(true);
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", result.user.email);
+      navigate("/");
+    } catch (err) {
+      alert(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    if (user.password !== password) {
-      alert("Incorrect password!");
-      return;
-    }
-
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", email);
-
-    alert("Login successful!");
-    navigate("/");
   };
 
   return (
@@ -57,15 +56,9 @@ const Login = () => {
           </p>
 
           {/* Google Sign In */}
-          <button style={googleButton} onClick={handleGoogleLogin}>
+          <button style={googleButton} onClick={handleGoogleLogin} disabled={loading}>
             <span style={googleIcon}>G</span>
-            Sign in with Google
-          </button>
-
-          {/* Email Button */}
-          <button style={emailButton}>
-            <span style={emailIcon}>✉</span>
-            Sign in with Email
+            {loading ? "Please wait…" : "Sign in with Google"}
           </button>
 
           {/* Divider */}
@@ -95,16 +88,10 @@ const Login = () => {
               style={inputStyle}
             />
 
-            <button type="submit" style={buttonStyle}>
-              Sign In
+            <button type="submit" style={buttonStyle} disabled={loading}>
+              {loading ? "Signing in…" : "Sign In"}
             </button>
           </form>
-
-          <p style={forgotText}>
-            <Link to="/forgot-password" style={linkStyle}>
-              Forgot Password?
-            </Link>
-          </p>
 
           <p style={bottomText}>
             Don’t have an account?{" "}
@@ -202,35 +189,6 @@ const googleIcon = {
   fontWeight: "700",
 };
 
-const emailButton = {
-  width: "100%",
-  padding: "14px",
-  background: "#ffffff",
-  border: "1px solid #cbd5e1",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontSize: "15px",
-  fontWeight: "600",
-  color: "#0f172a",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "10px",
-  marginBottom: "20px",
-};
-
-const emailIcon = {
-  width: "30px",
-  height: "30px",
-  borderRadius: "50%",
-  background: "#1565c0",
-  color: "#ffffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: "700",
-};
-
 const dividerContainer = {
   display: "flex",
   alignItems: "center",
@@ -274,11 +232,6 @@ const buttonStyle = {
   fontSize: "16px",
   fontWeight: "700",
   cursor: "pointer",
-};
-
-const forgotText = {
-  marginTop: "16px",
-  fontSize: "14px",
 };
 
 const bottomText = {
