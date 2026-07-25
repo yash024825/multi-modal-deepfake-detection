@@ -13,6 +13,7 @@ Supports:
 """
 import sys
 import os
+import gc
 import cv2
 import numpy as np
 import torch
@@ -27,6 +28,11 @@ MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Free-tier hosts (Render/Fly/HF Basic) give 1-2 shared vCPUs and little RAM.
+# Extra torch threads just fight each other for the same core and inflate
+# peak memory; pin to 1 so a single inference process stays lean.
+torch.set_num_threads(1)
+
 # ── constants (must match training scripts exactly) ───────────────────────────
 FACE_SIZE        = (224, 224)
 HAAR_MIN_FACE    = 60
@@ -36,6 +42,9 @@ AUDIO_N_MFCC     = 40
 AUDIO_MAX_FRAMES = 200
 AUDIO_SR         = 16000
 VIDEO_FRAME_SKIP = 10     # sample every Nth frame (matches training density)
+VIDEO_MAX_SAMPLES = 150   # hard cap on sampled frames -- bounds memory/runtime
+                           # on free-tier hosts regardless of video length
+GC_EVERY_N_SAMPLES = 20   # force garbage collection periodically during video loop
 
 # ── shared image transform (matches eval_transform in train_image.py) ─────────
 eval_transform = transforms.Compose([
@@ -196,6 +205,7 @@ def predict_video(model, path):
 
     all_probs = []
     frame_idx = 0
+    samples_taken = 0
 
     while True:
         ret, frame = cap.read()
@@ -211,9 +221,21 @@ def predict_video(model, path):
                     fake_prob = F.softmax(logits, dim=1)[0, 1].item()
                 all_probs.append(fake_prob)
 
+                # Explicitly drop references so they don't linger until the
+                # next gc cycle -- matters on low-RAM free-tier instances.
+                del x, logits
+                samples_taken += 1
+
+                if samples_taken % GC_EVERY_N_SAMPLES == 0:
+                    gc.collect()
+
+                if samples_taken >= VIDEO_MAX_SAMPLES:
+                    break
+
         frame_idx += 1
 
     cap.release()
+    gc.collect()
 
     if not all_probs:
         return "error", "no faces detected in video", 0.0
