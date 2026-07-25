@@ -15,17 +15,32 @@ app.use(express.json());
 
 /* =========================
    ✅ CORS FIX (IMPORTANT)
+   Allows your stable localhost dev URL AND any Vercel deployment --
+   production domain or per-deploy preview URL (which changes every
+   push, e.g. multi-modal-deepfake-detection-ifxxyuun4.vercel.app).
+   This avoids having to update FRONTEND_URL on every deploy.
 ========================= */
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowed =
+      !origin || // same-origin / server-to-server / curl requests have no Origin header
+      /\.vercel\.app$/.test(origin) ||
+      origin === "http://localhost:5173";
+
+    if (allowed) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+};
+
+app.use(cors(corsOptions));
 
 // 🔥 Handle preflight requests
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 
 /* =========================
    🗄️ DATABASE CONNECTION
