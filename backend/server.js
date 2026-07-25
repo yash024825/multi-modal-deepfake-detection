@@ -35,8 +35,7 @@ app.options("*", cors());
     await connectDB();
     console.log("✅ MongoDB connected successfully");
   } catch (err) {
-    console.error("❌ Database connection failed:", err);
-    process.exit(1);
+    console.error("⚠️ MongoDB connection failed (server will keep running, detection still works):", err.message);
   }
 })();
 

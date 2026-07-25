@@ -1,0 +1,8 @@
+node_modules/
+uploads/*
+!uploads/.gitkeep
+datasets/
+.env
+*.log
+__pycache__/
+*.pyc

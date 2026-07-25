@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const ACCEPTED_TYPES = {
   image: ["jpg", "jpeg", "png", "webp", "bmp"],
   video: ["mp4", "avi", "mov", "mkv", "webm"],
@@ -58,8 +60,8 @@ const UploadMediaPage = () => {
 
   const fileType = getFileType(file);
   const typeIcon = { image: "🖼️", video: "🎬", audio: "🎵" };
-  const typeColor = { image: "#7c3aed", video: BLUE, audio: "#0891b2" };
-  const typeBg    = { image: "#f3e8ff", video: "#dbeafe", audio: "#e0f2fe" };
+  const _typeColor = { image: "#7c3aed", video: BLUE, audio: "#0891b2" };
+  const _typeBg    = { image: "#f3e8ff", video: "#dbeafe", audio: "#e0f2fe" };
 
   const isSubmitDisabled = loading || !!validationError || !file;
   const displayError  = validationError || error;
@@ -74,7 +76,7 @@ const UploadMediaPage = () => {
     formData.append("file", file);
     setLoading(true); setError("");
     try {
-      const res  = await fetch("http://localhost:5000/api/detect", { method: "POST", body: formData });
+      const res  = await fetch(`${API_BASE_URL}/api/detect`, { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.details || data.error || "Server error");
       navigate("/result", { state: { file, result: data.result } });
@@ -303,7 +305,7 @@ const s = {
 
   /* BODY — two column */
   body: {
-    flex: 1, display: "flex", gap: 0,
+    flex: 1, display: "flex",
     maxWidth: 1280, margin: "0 auto", width: "100%",
     padding: "60px 60px",
     alignItems: "flex-start",
@@ -369,12 +371,12 @@ const s = {
 
   /* File preview — rectangle card like image 2 */
   filePreview: { width: "100%", display: "flex", flexDirection: "column", gap: 12 },
-  fileCard: (type) => ({
+  fileCard: {
     display: "flex", alignItems: "center", gap: 16,
     padding: "18px 20px", borderRadius: 12,
     background: "#0A1525", border: `1px solid ${BORDER}`,
     position: "relative",
-  }),
+  },
   fileCardIcon: { fontSize: 36, flexShrink: 0 },
   fileCardInfo: { flex: 1, display: "flex", flexDirection: "column", gap: 4, minWidth: 0 },
   fileCardName: { fontSize: 14, fontWeight: 700, color: WHITE, wordBreak: "break-all" },
