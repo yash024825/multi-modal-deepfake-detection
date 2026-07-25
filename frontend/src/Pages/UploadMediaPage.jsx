@@ -179,7 +179,7 @@ const UploadMediaPage = () => {
             {file ? (
               <div style={s.filePreview}>
                 {/* File card — styled like image 2 reference */}
-                <div style={s.fileCard(fileType)}>
+                <div style={s.fileCard}>
                   <div style={s.fileCardIcon}>{typeIcon[fileType] || "📄"}</div>
                   <div style={s.fileCardInfo}>
                     <div style={s.fileCardName}>{file.name}</div>
