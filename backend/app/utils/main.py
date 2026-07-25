@@ -22,6 +22,19 @@ import torch.nn.functional as F
 from torchvision import models, transforms
 from PIL import Image
 
+# ── diagnostics ────────────────────────────────────────────────────────────
+# TEMP: prints cv2 build info to stderr on every run so we can see in Render
+# logs whether cv2 is the real compiled package or a broken/shadowed import.
+# Remove once the CascadeClassifier AttributeError is confirmed fixed.
+print(f"[DIAG] cv2 file: {cv2.__file__}", file=sys.stderr)
+print(f"[DIAG] cv2 version: {getattr(cv2, '__version__', 'unknown')}", file=sys.stderr)
+print(f"[DIAG] has CascadeClassifier: {hasattr(cv2, 'CascadeClassifier')}", file=sys.stderr)
+try:
+    print(f"[DIAG] haarcascades path: {cv2.data.haarcascades}", file=sys.stderr)
+    print(f"[DIAG] haarcascades exists: {os.path.exists(cv2.data.haarcascades)}", file=sys.stderr)
+except Exception as e:
+    print(f"[DIAG] cv2.data access failed: {e}", file=sys.stderr)
+
 # ── paths ────────────────────────────────────────────────────────────────────
 BASE_DIR  = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
