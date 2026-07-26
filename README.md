@@ -36,7 +36,8 @@ Drag-and-drop interface supporting images, video, and audio uploads.
 ### Detection Results
 Confidence scoring, manipulation vs. authenticity signal breakdown, and model pipeline details.
 
-![Results Page](frontend/src/assets/results-page.png)
+![Results Page](frontend/src/assets/results-page1.png)
+![Results Page](frontend/src/assets/results-page2.png)
 
 ---
 
