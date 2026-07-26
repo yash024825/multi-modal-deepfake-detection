@@ -26,7 +26,7 @@ Built with a React frontend and a Node.js/Express backend, the app is trained on
 ### Landing Page
 Model accuracy stats, detection pipeline overview, and multi-modal capability highlights.
 
-![Homepage](screenshots/homepage.png)
+![Homepage](C:\Users\Administrator\Pictures\Camera Roll/homepage.png)
 
 ### Upload & Analyze
 Drag-and-drop interface supporting images, video, and audio uploads.
