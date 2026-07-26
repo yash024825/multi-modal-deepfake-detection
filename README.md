@@ -2,11 +2,11 @@
 
 **AI-powered deepfake detection across video, image, and audio — live and deployed.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?logo=vercel)](https://multi-modal-deepfake-detection.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?logo=vercel)](https://multi-modal-deepfake-detection.vercel.app)
 [![Backend](https://img.shields.io/badge/API-Render-46E3B7?logo=render)](https://multi-modal-deepfake-detection.onrender.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
-🔗 **Live App:** [multi-modal-deepfake-detection.vercel.app](https://multi-modal-deepfake-detection.vercel.app/)
+🔗 **Live App:** [multi-modal-deepfake-detection.vercel.app](https://multi-modal-deepfake-detection.vercel.app)
 🔗 **Backend API:** [multi-modal-deepfake-detection.onrender.com](https://multi-modal-deepfake-detection.onrender.com)
 
 > ⚠️ **Note:** The backend is hosted on Render's free tier, so the first request after a period of inactivity may take 30–60 seconds while the server spins up.
@@ -99,7 +99,7 @@ Confidence scoring, manipulation vs. authenticity signal breakdown, and model pi
 
 | Service | Platform | URL |
 |---------|----------|-----|
-| Frontend | Vercel | https://multi-modal-deepfake-detection.vercel.app/ |
+| Frontend | Vercel | https://multi-modal-deepfake-detection.vercel.app |
 | Backend / API | Render | https://multi-modal-deepfake-detection.onrender.com |
 
 ---
@@ -151,7 +151,7 @@ The app will open at `http://localhost:5173` (or similar port).
 
 ## 📋 Usage
 
-1. Visit the [live app](https://multi-modal-deepfake-detection.vercel.app/) (or your local instance).
+1. Visit the [live app](https://multi-modal-deepfake-detection.vercel.app) (or your local instance).
 2. Sign up or log in.
 3. Upload an image, video, or audio file (JPG, PNG, WEBP, BMP · MP4, AVI, MOV, MKV, WEBM · WAV, MP3, FLAC, OGG, M4A — max 200MB).
 4. View the AI-based deepfake detection results, including confidence score and signal breakdown.
