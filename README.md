@@ -2,7 +2,7 @@
 
 **AI-powered deepfake detection across video, image, and audio — live and deployed.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?logo=vercel)](https://multi-modal-deepfake-detection.vercel.app)
+[![Live Demo](frontend/src/assets/homepage.png)](https://multi-modal-deepfake-detection.vercel.app)
 [![Backend](https://img.shields.io/badge/API-Render-46E3B7?logo=render)](https://multi-modal-deepfake-detection.onrender.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
