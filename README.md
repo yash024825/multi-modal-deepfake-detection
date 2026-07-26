@@ -26,17 +26,17 @@ Built with a React frontend and a Node.js/Express backend, the app is trained on
 ### Landing Page
 Model accuracy stats, detection pipeline overview, and multi-modal capability highlights.
 
-![Homepage](screenshots/homepage.png)
+![Homepage](frontend/src/assets/homepage.png)
 
 ### Upload & Analyze
 Drag-and-drop interface supporting images, video, and audio uploads.
 
-![Upload Page](screenshots/upload-page.png)
+![Upload Page](frontend/src/assets/upload-page.png)
 
 ### Detection Results
 Confidence scoring, manipulation vs. authenticity signal breakdown, and model pipeline details.
 
-![Results Page](screenshots/results-page.png)
+![Results Page](frontend/src/assets/results-page.png)
 
 ---
 
@@ -168,7 +168,8 @@ multi-modal-deepfake-detection/
 │   ├── routes/
 │   └── server.js
 ├── frontend/           # React frontend
-├── screenshots/        # App screenshots used in this README
+│   └── src/
+│       └── assets/     # App screenshots used in this README
 └── README.md
 ```
 
